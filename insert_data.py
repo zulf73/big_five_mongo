@@ -1,4 +1,4 @@
-import mongoose
+#import mongoose
 import numpy as np
 # connect to database
 # for each row create a json document
@@ -170,10 +170,10 @@ translation_matrix_five_to_thomas_booth=[
   0,0,0,0,1
 ]
 
-A = np.array( thomas_booth_11_factor_cf )
-B = np.array( translation_matrix_five_to_thomas_booth )
+A = np.array( thomas_booth_11_factor_cf ).reshape(74, 11)
+B = np.array( translation_matrix_five_to_thomas_booth ).reshape(11,5)
 
-traits_matrix = transpose(A * B)
+traits_matrix = np.transpose(np.dot(A,B))
 
 f = open( 'bigfive.csv', 'r')
 
@@ -185,20 +185,22 @@ def create_traits_dict( v, q ):
     d['e'] = v[2]
     d['a'] = v[3]
     d['n'] = v[4]
-    for k in np.range(len(tnames)):
+    for k in range(len(tnames)):
         d[tnames[k]]=q[k]
     return d
 
 def transform_to_traits_dict( big_five_vec ):
-    q = big_five_vec * traits_matrix
+    q = np.dot(big_five_vec,traits_matrix)
     d = create_traits_dict( big_five_vec, q )
     return d
 
 for line in f:
     d = dict()
-    v = line.split(',')
+    z = line.split(',')
+    v = np.array(z).astype(np.float)
     d = transform_to_traits_dict( v )
-    db.profiles.insertOne( d )
+    print d
+    #db.profiles.insertOne( d )
 
 
 
